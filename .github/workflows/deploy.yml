@@ -1,0 +1,29 @@
+name: Clone Website
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  deploy-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checks out repo
+        uses: actions/checkout@v3
+
+      - name: Get repository description
+        id: description
+        run: |
+          OWNER=${{ github.repository_owner }}
+          REPO=${{ github.event.repository.name }}
+          DESCRIPTION=$(curl -s "https://api.github.com/repos/$OWNER/$REPO" | jq -r '.description')
+          echo "::set-output name=description::$DESCRIPTION"
+
+      - name: Cloning and replacing
+        run: |
+          chmod +x ./echome.sh
+          ./echome.sh "${{ steps.description.outputs.description }}"
+          echo "hello there fellow human"
+
